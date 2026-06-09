@@ -39,4 +39,8 @@ src/
 - [ ] Etapa 3: Vue Router (múltiples vistas)
 - [ ] Etapa 4: Componente GameCard con BEM
 - [ ] Etapa 5: Pinia (estado compartido)
-- [ ] Etapa 6: Consumo de API RAWG
+- [ ] # Etapa 6: Consumo de API RAWG
+
+# Laboratorio-RIA
+
+> > > > > > > 576b206d40f023c9a2cb897262a016940641ff00
