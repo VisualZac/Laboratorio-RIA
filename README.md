@@ -23,9 +23,10 @@ src/
 │   │   ├── TheNavbar.vue
 │   │   └── TheFooter.vue
 │   │
-│   ├── game/                ← Componentes relacionados con juegos
+│   ├── game/
+│   │   └── ItemCard.vue
 │   │
-│   └── ui/                  ← Componentes reutilizables de interfaz
+│   └── ui/
 │
 ├── views/
 │   └── HomeView.vue
@@ -47,7 +48,7 @@ src/
 - [x] Etapa 1: Conceptos base de Vue
 - [x] Etapa 2: Proyecto base creado ← estás acá
 - [ ] Etapa 3: Vue Router (múltiples vistas)
-- [ ] Etapa 4: Componente GameCard con BEM
+- [x] Etapa 4: Componente GameCard con BEM
 - [ ] Etapa 5: Pinia (estado compartido)
 - [ ] # Etapa 6: Consumo de API RAWG
 
