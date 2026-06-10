@@ -52,5 +52,3 @@ src/
 - [ ] # Etapa 6: Consumo de API RAWG
 
 # Laboratorio-RIA
-
-> > > > > > > 576b206d40f023c9a2cb897262a016940641ff00
