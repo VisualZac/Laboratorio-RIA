@@ -1,9 +1,15 @@
 <script setup lang="ts">
-// Acá van a ir los imports cuando los necesitemos
-// Por ahora solo mostramos el contenido de la ruta activa
+import TheNavbar from './components/layout/TheNavbar.vue'
+import TheFooter from './components/layout/TheFooter.vue'
+
 </script>
 
 <template>
-  <!-- RouterView muestra el componente de la ruta actual -->
-  <RouterView />
+   <TheNavbar />
+
+   <main class="app-main">
+     <RouterView />
+   </main>
+  <TheFooter />
+
 </template>
