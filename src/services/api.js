@@ -28,8 +28,7 @@ export const gameService = {
     try {
       const response = await fetch(`${BASE_URL}/games/${id}?key=${API_KEY}`);
       if (!response.ok) throw new Error("Error al traer los datos");
-
-      const data = await fetch(`${BASE_URL}/games/${id}?key=${API_KEY}`).then((res) => res.json());
+      const data = await response.json();
       return data;
     } catch (error) {
       console.error("error al obtener detalles del juego", error);

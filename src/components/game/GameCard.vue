@@ -1,4 +1,5 @@
 <script setup>
+import { useFavoritesStore } from "@/stores/favorites.js";
 const props = defineProps({
   game: {
     type: Object,
@@ -14,8 +15,10 @@ function soloAnio(fecha) {
 function colorRating(rating) {
   if (rating >= 4.5) return "#4caf50"; // Verde para los juegos GOD
   if (rating >= 3.5) return "#ffeb3b"; // Amarillo para los juegardos
-  return "#f44336"; // Rojo para los juegos HORRIBLES que dan ganas de llorar
+  return "#f44336"; // Rojo para los juegos HORRIBLES
 }
+
+const favStore = useFavoritesStore();
 </script>
 
 <template>
@@ -32,6 +35,14 @@ function colorRating(rating) {
       <span class="game-card__rating" :style="{ color: colorRating(props.game.rating) }">
         ★ {{ props.game.rating }}
       </span>
+
+      <button
+        class="game-card__fav-btn"
+        :class="{ 'game-card__fav-btn--activo': favStore.isFavorite(props.game.id) }"
+        @click.prevent="favStore.toggleFavorite(props.game)"
+      >
+        {{ favStore.isFavorite(props.game.id) ? "♥" : "♡" }}
+      </button>
     </div>
 
     <div class="game-card__info">
@@ -160,5 +171,30 @@ function colorRating(rating) {
   font-size: 0.75rem;
   color: #4a5268;
   white-space: nowrap;
+}
+.game-card__fav-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(13, 15, 20, 0.75);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: var(--color-texto-suave);
+  font-size: 1rem;
+  transition:
+    color 200ms ease,
+    transform 200ms ease;
+}
+
+.game-card__fav-btn:hover {
+  transform: scale(1.2);
+  color: #f87171;
+}
+
+.game-card__fav-btn--activo {
+  color: #f87171;
 }
 </style>
