@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { RouterView } from "vue-router";
 </script>
 
@@ -12,7 +12,7 @@ import { RouterView } from "vue-router";
 * {
   margin: 0;
   padding: 0;
-  box-shadow: border-box;
+  box-sizing: border-box;
 }
 
 body {
