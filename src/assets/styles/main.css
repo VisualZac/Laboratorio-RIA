@@ -1,26 +1,9 @@
 /* ============================================
    GAME EXPLORER — Estilos globales
-   Tu primer archivo CSS del laboratorio
+     Reset, estilos base y contenedor principal
    ============================================ */
 
-/* Variables CSS: los "tokens" de diseño.
-   Definís los colores, tipografías y espaciados
-   UNA sola vez, y los usás en toda la app. */
-:root {
-  --color-fondo:       #0d0f14;
-  --color-superficie:  #161b25;
-  --color-borde:       #2a3347;
-  --color-acento:      #6c63ff;
-  --color-texto:       #e8eaf0;
-  --color-texto-suave: #7a84a0;
-
-  --fuente-titulos: 'Segoe UI', sans-serif;
-  --fuente-cuerpo:  'Segoe UI', system-ui, sans-serif;
-
-  --radio-sm: 4px;
-  --radio-md: 8px;
-  --radio-lg: 12px;
-}
+@import './variables.css';
 
 /* Reset básico */
 *, *::before, *::after {
@@ -35,6 +18,11 @@ body {
   color: var(--color-texto);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+}
+
+.app-main {
+  min-height: calc(100vh - 140px);
+  padding-block: 3rem;
 }
 
 img {
