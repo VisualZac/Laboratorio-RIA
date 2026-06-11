@@ -1,30 +1,13 @@
-<script setup lang="ts">
-import { RouterView } from "vue-router";
+<script setup>
+import TheNavbar from "@/components/layout/TheNavbar.vue";
+import TheFooter from "@/components/layout/TheFooter.vue";
 </script>
 
 <template>
-  <div class="app-container">
+  <TheNavbar />
+  <main class="app-main">
     <RouterView />
-  </div>
+  </main>
+
+  <TheFooter />
 </template>
-
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background-color: #0d0f14;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
-}
-
-.app-container {
-  min-height: 100vh;
-  padding: 0 2rem;
-}
-</style>
