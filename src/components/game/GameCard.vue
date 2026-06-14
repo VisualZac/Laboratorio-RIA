@@ -139,10 +139,11 @@ const favStore = useFavoritesStore();
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-texto);
-  /* Truncar si el nombre es muy largo */
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .game-card__pie {

@@ -9,7 +9,7 @@ export const gameService = {
       if (!response.ok) throw new Error("Error al traer los datos");
       const data = await response.json();
 
-      // Mapeamos los datos para quedarnos solo con lo que necesitamos
+      // Mapeamos los datos para quedarnos solo con lo que necesitamos (Los populares en este caso)
       return data.results.map((game) => ({
         id: game.id,
         name: game.name,
