@@ -24,4 +24,13 @@ import { RouterLink } from "vue-router";
 .navbar__link:hover {
   color: var(--color-acento);
 }
+
+/*Responsive */
+@media (max-width: 480px) {
+  .navbar__contenido {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+  }
+}
 </style>
