@@ -16,7 +16,7 @@ onMounted(async () => {
 </script>
 <template>
   <div class="contenedor inicio">
-    <h1 class="inicio__titulo">Game Explorer</h1>
+    <h1 class="inicio__titulo">Juegos populares</h1>
 
     <!-- Formulario de búsqueda -->
     <div class="buscador">
