@@ -5,7 +5,7 @@ import { RouterLink } from "vue-router";
 <template>
   <header class="navbar">
     <div class="contenedor navbar__contenido">
-      <RouterLink to="/" class="navbar__logo">Game Explorer</RouterLink>
+       <img src="/logo.png" alt="Game Explorer" />
 
       <nav class="navbar__menu">
         <RouterLink to="/" class="navbar__link">Inicio</RouterLink>
@@ -16,6 +16,30 @@ import { RouterLink } from "vue-router";
 </template>
 
 <style scoped>
+
+.navbar {
+  background-color: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.navbar__contenido {
+  min-height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar__logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.navbar__menu {
+  display: flex;
+  gap: 1rem;
+}
+
 .navbar__link {
   color: var(--color-texto-suave);
   transition: color 200ms ease;
