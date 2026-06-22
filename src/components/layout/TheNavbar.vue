@@ -1,5 +1,8 @@
 <script setup>
 import { RouterLink } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
 </script>
 
 <template>
@@ -8,9 +11,29 @@ import { RouterLink } from "vue-router";
        <img src="/logo.png" alt="Game Explorer" />
 
       <nav class="navbar__menu">
-        <RouterLink to="/" class="navbar__link">Inicio</RouterLink>
-        <RouterLink to="/favoritos" class="navbar__link">Favoritos</RouterLink>
-      </nav>
+  <RouterLink to="/" class="navbar__link">Inicio</RouterLink>
+  <RouterLink to="/favoritos" class="navbar__link">Favoritos</RouterLink>
+
+  <span v-if="auth.usuario" class="navbar__link">
+    Hola {{ auth.usuario.nombre }}
+  </span>
+
+  <button
+  v-if="auth.usuario"
+  @click="auth.logout"
+  class="navbar__link navbar__button"
+>
+  Salir
+</button>
+
+  <RouterLink
+    v-else
+    to="/login"
+    class="navbar__link"
+  >
+    Login
+  </RouterLink>
+</nav>
     </div>
   </header>
 </template>
@@ -43,6 +66,14 @@ import { RouterLink } from "vue-router";
 .navbar__link {
   color: var(--color-texto-suave);
   transition: color 200ms ease;
+}
+
+.navbar__button {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
 }
 
 .navbar__link:hover {
