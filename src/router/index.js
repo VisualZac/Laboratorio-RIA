@@ -20,6 +20,11 @@ const router = createRouter({
       // Usando @ para ir directo a src/views/FavoritesView.vue
       component: () => import("@/views/FavoritesView.vue"),
     },
+    {
+      path: "/login",
+      name: "login",
+      component: () => import("../views/LoginView.vue"),
+    }
   ],
 });
 
