@@ -1,4 +1,3 @@
-
 :root {
   /* colores */
   --color-fondo: #0d0f14;
@@ -9,11 +8,19 @@
   --color-texto-suave: #7a84a0;
 
   /* tipografías */
-  --fuente-titulos: 'Segoe UI', sans-serif;
-  --fuente-cuerpo: 'Segoe UI', system-ui, sans-serif;
+  --fuente-titulos: "Segoe UI", sans-serif;
+  --fuente-cuerpo: "Segoe UI", system-ui, sans-serif;
 
   /* radios */
   --radio-sm: 4px;
   --radio-md: 8px;
   --radio-lg: 12px;
+}
+/* Tema claro */
+[data-tema="claro"] {
+  --color-fondo: #f4f4f8;
+  --color-superficie: #ffffff;
+  --color-borde: #dde0ec;
+  --color-texto: #1a1a2e;
+  --color-texto-suave: #4a5268;
 }

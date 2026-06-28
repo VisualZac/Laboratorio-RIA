@@ -8,25 +8,16 @@ export function useSearch(listaCompleta) {
   const busqueda = ref(sessionStorage.getItem(SESSION_KEY_BUSQUEDA) || "");
 
   //Filtros
-  const filtros = ref(sessionStorage.getItem(SESSION_GENERO)); // Corregido: getItem
+  const filtros = ref(sessionStorage.getItem(SESSION_GENERO) || "");
 
   //computed: aplica la busqueda y genero al mismo tiempo
   //solo se calcula cuando se cambia la busqueda, el genero activo (actual) o la lista completa
   const listaFiltrada = computed(() => {
     let resultado = [...listaCompleta.value];
 
-    //   Filtro 1: por texto
-    const texto = busqueda.value.toLowerCase().trim(); // Corregido: toLowerCase
-    if (texto) {
-      resultado = resultado.filter((item) => item.name.toLowerCase().includes(texto));
-    }
-
-    //   Filtro 2: por genero
-    //   Cada jueguito tiene generos: [{id, name}, etc...]
-    //   Revisamos si alguno de sus generos coincide con el ingresado
+    // Solo filtramos por género localmente
+    // La búsqueda por texto la maneja HomeView con la API
     if (filtros.value) {
-      //.some() devuelve true si al menos uno de los géneros del juego coincide con el seleccionado
-      //.find() o .includes() directamente sobre el array de géneros no funcionaría porque estás comparando objetos, no strings :D
       resultado = resultado.filter((item) => item.genres?.some((g) => g.slug === filtros.value));
     }
 

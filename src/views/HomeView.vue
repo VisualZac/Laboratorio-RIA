@@ -1,23 +1,88 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import GameCard from "@/components/game/GameCard.vue";
 import { gameService } from "@/services/api.js";
 import { useSearch } from "@/composables/useSearch.js";
+import SkeletonCard from "@/components/ui/skeletonCard.vue";
+import { useInfiniteScroll } from "@/composables/useInfiniteScroll.js";
 
 const listaJuegos = ref([]);
-const loading = ref(true);
 const generos = ref([]);
+const loading = ref(true);
+const paginadoActual = ref(1);
 
 const { busqueda, filtros, listaCompleta, alEscribir, limpiar, setGenero } = useSearch(listaJuegos);
+const { cargando, hayMas, reiniciar } = useInfiniteScroll(cargarMasJuegos);
+
+let timerBusqueda = null;
+
+watch(busqueda, (nuevaBusqueda) => {
+  clearTimeout(timerBusqueda);
+  timerBusqueda = setTimeout(async () => {
+    listaJuegos.value = [];
+    paginadoActual.value = 0;
+    reiniciar();
+
+    if (nuevaBusqueda.trim()) {
+      // Hay texto → buscar en la API (infinite scroll desactivado en búsqueda)
+      const resultado = await gameService.buscarJuegos(nuevaBusqueda.trim(), 1);
+      listaJuegos.value = resultado.juegos;
+      // La búsqueda tiene su propio paginado — dejamos hayMas en manos del resultado
+      hayMas.value = resultado.hayMas;
+    } else {
+      // No hay texto → volver a populares desde página 1
+      await cargarMasJuegos();
+    }
+  }, 400);
+});
+
+// El filtro de género filtra localmente, no hace falta recargar la API.
+// Solo reseteamos el paginado para que el infinite scroll vuelva a activarse.
+watch(filtros, () => {
+  paginadoActual.value = 1;
+  reiniciar();
+});
+
+const ordenamiento = ref("-rating"); // En default por los más populares
+
+// Opciones disponibles
+const opcionesOrden = [
+  { valor: "-rating", etiqueta: "Más populares" },
+  { valor: "-released", etiqueta: "Más recientes" },
+  { valor: "-metacritic", etiqueta: "Mejor puntuados" },
+  { valor: "name", etiqueta: "Nombre A-Z" },
+];
+
+// Función que carga la siguiente página y la agrega a la lista
+async function cargarMasJuegos() {
+  paginadoActual.value++;
+  const resultado = await gameService.getPopularGames(paginadoActual.value, ordenamiento.value);
+  listaJuegos.value.push(...resultado.juegos);
+  // Devolvemos si hay más para que useInfiniteScroll sepa si seguir
+  return resultado.hayMas;
+}
+
+// Cuando cambia el orden, limpiamos búsqueda y reseteamos todo
+function cambiarOrden(nuevoOrden) {
+  // Si hay búsqueda activa, la limpiamos primero para no mezclar resultados
+  if (busqueda.value) {
+    busqueda.value = "";
+    sessionStorage.removeItem("busqueda_actual");
+  }
+  ordenamiento.value = nuevoOrden;
+  listaJuegos.value = [];
+  paginadoActual.value = 0; // cargarMasJuegos hace ++ antes del fetch, arranca en 1
+  reiniciar();
+  cargarMasJuegos();
+}
 
 onMounted(async () => {
-  //cargamos juegos y generos en simultaneo, se usa promiseall porque no se puede hacer con dos await aparentemente no se pueden hacer dos fetch seguidos,
-  //cargaria uno y despue el otro >:C, con primiseall esto no ocurre y los pueden estar al mismo tiempo :D
-  const [juegos, listaGeneros] = await Promise.all([
-    gameService.getPopularGames(),
+  const [resultado, listaGeneros] = await Promise.all([
+    gameService.getPopularGames(1, ordenamiento.value),
     gameService.getGenres(),
   ]);
-  listaJuegos.value = juegos;
+  listaJuegos.value = resultado.juegos;
+  paginadoActual.value = 1;
   generos.value = listaGeneros;
   loading.value = false;
 });
@@ -28,6 +93,16 @@ onMounted(async () => {
 
     <!-- Control de Busqueda y Filtrado -->
     <div class="inicio__controles">
+      <!-- Selector de ordenamiento -->
+      <select
+        class="filtro-genero"
+        :value="ordenamiento"
+        @change="cambiarOrden($event.target.value)"
+      >
+        <option v-for="op in opcionesOrden" :key="op.valor" :value="op.valor">
+          {{ op.etiqueta }}
+        </option>
+      </select>
       <!-- Buscador -->
       <div class="buscador">
         <input
@@ -51,16 +126,21 @@ onMounted(async () => {
       </select>
 
       <!--Boton de limpiar los filtros(solo aparecera si tiene un filtro seleccionado :D)-->
+
       <button v-if="filtros" class="filtro-limpiar" @click="setGenero('')">
         ✕ Limpiar filtros
       </button>
     </div>
+
     <!--Contador de Resultados-->
     <p v-if="busqueda || filtros" class="inicio__resultados">
       {{ listaCompleta.length }} resultado{{ listaCompleta.length !== 1 ? "s" : "" }}
     </p>
-    <!-- Loading -->
-    <div v-if="loading" class="inicio__loading">Cargando juegos...</div>
+
+    <!-- Skeleton loaders mientras carga -->
+    <div v-if="loading" class="inicio__grilla">
+      <SkeletonCard v-for="n in 8" :key="n" />
+    </div>
 
     <!-- Sin resultados -->
     <div v-else-if="listaCompleta.length === 0" class="inicio__sin-resultados">
@@ -70,6 +150,17 @@ onMounted(async () => {
     <!-- Grilla -->
     <div v-else class="inicio__grilla">
       <GameCard v-for="juego in listaCompleta" :key="juego.id" :game="juego" />
+    </div>
+
+    <!-- Indicador de carga al final de la página -->
+    <div v-if="cargando" class="inicio__cargando-mas">
+      <div class="inicio__spinner"></div>
+      <p>Cargando más juegos...</p>
+    </div>
+
+    <!-- Mensaje cuando ya no hay más -->
+    <div v-else-if="!hayMas && listaCompleta.length > 0" class="inicio__fin">
+      Ya viste todos los juegos disponibles
     </div>
   </div>
 </template>
@@ -189,6 +280,38 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
+}
+/* ── Infinite scroll ── */
+.inicio__cargando-mas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 0;
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.inicio__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-borde);
+  border-top-color: var(--color-acento);
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+.inicio__fin {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
 }
 
 /* ── Responsive ── */
