@@ -29,12 +29,23 @@ const favStore = useFavoritesStore();
         :src="props.game.background_image"
         :alt="props.game.name"
         class="game-card__imagen"
+        loading="lazy"
       />
+      <!--loading="lazy" sirve para retrasar la carga de imágenes, hasta que el usuario hace scroll hasta ellos -->
       <div v-else class="game-card__sin-imagen">Sin imagen disponible</div>
 
-      <span class="game-card__rating" :style="{ color: colorRating(props.game.rating) }">
-        ★ {{ props.game.rating }}
-      </span>
+      <div class="game-card__rating-bar">
+        <div
+          class="game-card__rating-fill"
+          :style="{
+            width: (props.game.rating / 5) * 100 + '%',
+            backgroundColor: colorRating(props.game.rating),
+          }"
+        ></div>
+        <span class="game-card__rating-texto">
+          ★ {{ props.game.rating?.toFixed(1) ?? "S/D" }}
+        </span>
+      </div>
 
       <button
         class="game-card__fav-btn"
@@ -116,15 +127,31 @@ const favStore = useFavoritesStore();
   font-size: 0.875rem;
 }
 
-.game-card__rating {
+.game-card__rating-bar {
   position: absolute;
-  bottom: 0.5rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.game-card__rating-fill {
+  height: 100%;
+  border-radius: 0 2px 2px 0;
+  transition: width 600ms ease;
+}
+
+.game-card__rating-texto {
+  position: absolute;
+  bottom: 8px;
   left: 0.5rem;
   background: rgba(13, 15, 20, 0.8);
   padding: 2px 8px;
   border-radius: var(--radio-sm);
   font-size: 0.75rem;
   font-weight: 700;
+  color: var(--color-texto);
 }
 
 /* ── Info ── */

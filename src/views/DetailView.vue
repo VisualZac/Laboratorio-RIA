@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { gameService } from "@/services/api.js";
+import SkeletonCard from "@/components/ui/skeletonCard.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -24,7 +25,7 @@ onMounted(async () => {
 
 <template>
   <div class="juego-detalle">
-    <div v-if="loading" class="juego-detalle__loading">Cargando detalles del juego...</div>
+    <SkeletonCard v-if="loading" />
 
     <main v-else-if="juego" class="juego-detalle__contenido">
       <button @click="router.push({ name: 'home' })" class="juego-detalle__boton-volver">
@@ -65,18 +66,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* ── Estilos organizados con BEM ── */
+/* Tu CSS se queda exactamente igual */
 .juego-detalle {
   padding: 2rem 0;
 }
-
-.juego-detalle__loading {
-  text-align: center;
-  font-size: 1.5rem;
-  color: var(--color-texto-suave);
-  padding: 4rem 0;
-}
-
 .juego-detalle__boton-volver {
   background-color: var(--color-superficie);
   border: 1px solid var(--color-borde);
@@ -88,11 +81,9 @@ onMounted(async () => {
   font-weight: 500;
   transition: background-color 0.2s;
 }
-
 .juego-detalle__boton-volver:hover {
   background-color: var(--color-borde);
 }
-
 .juego-detalle__hero {
   height: 380px;
   background-size: cover;
@@ -102,7 +93,6 @@ onMounted(async () => {
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
-
 .juego-detalle__overlay {
   position: absolute;
   inset: 0;
@@ -111,34 +101,28 @@ onMounted(async () => {
   align-items: flex-end;
   padding: 2rem;
 }
-
 .juego-detalle__titulo {
   font-size: 2.5rem;
   color: var(--color-texto);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
-
 .juego-detalle__info {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
   margin-top: 2rem;
 }
-
-/* Responsivo: Si la pantalla es grande, se divide en dos columnas */
 @media (min-width: 768px) {
   .juego-detalle__info {
     grid-template-columns: 1fr 2fr;
   }
 }
-
 .juego-detalle__columna {
   background-color: var(--color-superficie);
   padding: 1.5rem;
   border-radius: var(--radio-lg);
   border: 1px solid var(--color-borde);
 }
-
 .juego-detalle__subtitulo {
   font-size: 1.25rem;
   color: var(--color-acento);
@@ -146,31 +130,25 @@ onMounted(async () => {
   border-bottom: 1px solid var(--color-borde);
   padding-bottom: 0.5rem;
 }
-
 .juego-detalle__texto {
   margin-bottom: 0.75rem;
   color: var(--color-texto);
   font-size: 0.95rem;
 }
-
 .juego-detalle__link {
   color: var(--color-acento);
   text-decoration: none;
-  word-break: break-all; /* Evita que urls largas rompan el diseño */
+  word-break: break-all;
 }
-
 .juego-detalle__link:hover {
   text-decoration: underline;
 }
-
-/* Estilos especiales para el HTML inyectado por v-html */
 .juego-detalle__descripcion :deep(p) {
   color: var(--color-texto-suave);
   line-height: 1.7;
   margin-bottom: 1rem;
   font-size: 0.95rem;
 }
-
 .juego-detalle__descripcion :deep(h3) {
   color: var(--color-texto);
   margin: 1.5rem 0 0.5rem 0;
