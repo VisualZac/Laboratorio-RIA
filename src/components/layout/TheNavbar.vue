@@ -5,6 +5,10 @@ import { useFavoritesStore } from "@/stores/favorites.js";
 
 const { temaOscuro, cambioTema } = useTheme();
 const favStore = useFavoritesStore();
+import { RouterLink } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
 </script>
 
 <template>
@@ -108,6 +112,14 @@ const favStore = useFavoritesStore();
   transition:
     color 150ms ease,
     background-color 150ms ease;
+}
+
+.navbar__button {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
 }
 
 .navbar__link:hover {
