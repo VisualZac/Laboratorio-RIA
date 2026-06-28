@@ -1,55 +1,57 @@
 # 🎮 Mi Lab RIA — Game Explorer
 
-Proyecto propio del laboratorio, construido desde cero.
+Aplicación web desarrollada con Vue 3 y Vite para explorar videojuegos utilizando la API RAWG.
 
-## Cómo levantar el proyecto
+## Tecnologías utilizadas
 
-```bash
-npm install
-npm run dev
-```
+- Vue 3
+- Vite
+- JavaScript
+- Vue Router
+- Pinia
+- HTML5
+- CSS3
+- RAWG API
+- LocalStorage
+- SessionStorage
 
-## Estructura actual
+## Estructura del proyecto
 
-```
+```text
 src/
 ├── assets/
 │   └── styles/
-│       ├── main.css          ← Estilos globales y layout base
-│       └── variables.css     ← Variables CSS globales
-│
+│       ├── main.css
+│       └── variables.css
 ├── components/
 │   ├── layout/
 │   │   ├── TheNavbar.vue
 │   │   └── TheFooter.vue
-│   │
 │   ├── game/
-│   │   └── ItemCard.vue
-│   │
+│   │   └── GameCard.vue
 │   └── ui/
-│
 ├── views/
-│   └── HomeView.vue
-│
+│   ├── HomeView.vue
+│   ├── DetailView.vue
+│   ├── FavoritesView.vue
+│   └── LoginView.vue
 ├── router/
 │   └── index.js
-│
-├── stores/                  ← Estado global (Pinia)
-├── services/                ← Consumo de APIs
-├── composables/             ← Lógica reutilizable
-├── data/                    ← Datos estáticos
-│
-├── App.vue                  ← Componente raíz
-└── main.js                  ← Punto de entrada
+├── stores/
+├── services/
+├── composables/
+├── App.vue
+└── main.js
 
-
-## Lo que viene (por etapas)
-
-- [x] Etapa 1: Conceptos base de Vue
-- [x] Etapa 2: Proyecto base creado ← estás acá
-- [ ] Etapa 3: Vue Router (múltiples vistas)
-- [x] Etapa 4: Componente GameCard con BEM
-- [ ] Etapa 5: Pinia (estado compartido)
-- [ ] # Etapa 6: Consumo de API RAWG
+Funcionalidades
+      Navegación entre vistas con Vue Router.
+      Consulta de videojuegos mediante la API RAWG.
+      Visualización de detalle de cada juego.
+      Búsqueda y filtrado de juegos.
+      Gestión de favoritos con Pinia.
+      Persistencia de favoritos en LocalStorage.
+      Sesión simulada con SessionStorage.
+      Componentes reutilizables.
+      Estilos organizados con metodología BEM.
 
 # Laboratorio-RIA
