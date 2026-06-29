@@ -1,14 +1,18 @@
 <script setup>
-import { RouterLink, useLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { useTheme } from "@/composables/useTheme.js";
 import { useFavoritesStore } from "@/stores/favorites.js";
+import { useAuthStore } from "@/stores/auth";
 
 const { temaOscuro, cambioTema } = useTheme();
 const favStore = useFavoritesStore();
-import { RouterLink } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-
 const auth = useAuthStore();
+const router = useRouter();
+
+function cerrarSesion() {
+  auth.logout();
+  router.push({ name: "login" });
+}
 </script>
 
 <template>
@@ -28,10 +32,18 @@ const auth = useAuthStore();
 
         <RouterLink to="/favoritos" class="navbar__link" active-class="navbar__link--activo">
           Favoritos
-          <!-- Badge con cantidad de favoritos -->
           <span v-if="favStore.favorites.length > 0" class="navbar__badge">
             {{ favStore.favorites.length }}
           </span>
+        </RouterLink>
+
+        <!-- Usuario logueado -->
+        <span v-if="auth.usuario" class="navbar__usuario"> 👤 {{ auth.usuario.nombre }} </span>
+        <button v-if="auth.usuario" class="navbar__link navbar__button" @click="cerrarSesion">
+          Salir
+        </button>
+        <RouterLink v-else to="/login" class="navbar__link" active-class="navbar__link--activo">
+          Login
         </RouterLink>
 
         <!-- Toggle tema -->
@@ -69,7 +81,6 @@ const auth = useAuthStore();
   height: 100%;
 }
 
-/* ── Logo ── */
 .navbar__logo {
   display: flex;
   align-items: center;
@@ -92,7 +103,6 @@ const auth = useAuthStore();
   color: var(--color-acento);
 }
 
-/* ── Nav links ── */
 .navbar__nav {
   display: flex;
   align-items: center;
@@ -119,7 +129,6 @@ const auth = useAuthStore();
   border: none;
   font: inherit;
   cursor: pointer;
-  padding: 0;
 }
 
 .navbar__link:hover {
@@ -132,7 +141,6 @@ const auth = useAuthStore();
   background-color: rgba(108, 99, 255, 0.12);
 }
 
-/* Badge de favoritos */
 .navbar__badge {
   display: inline-flex;
   align-items: center;
@@ -148,7 +156,12 @@ const auth = useAuthStore();
   line-height: 1;
 }
 
-/* Toggle tema */
+.navbar__usuario {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  padding: 0.4rem 0.5rem;
+}
+
 .navbar__tema {
   background: none;
   border: 1px solid var(--color-borde);
@@ -164,7 +177,6 @@ const auth = useAuthStore();
   border-color: var(--color-acento);
 }
 
-/* ── Responsive ── */
 @media (max-width: 480px) {
   .navbar__inner {
     flex-direction: column;

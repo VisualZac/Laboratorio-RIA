@@ -6,7 +6,7 @@ import OfflineBanner from "@/components/ui/OfflineBanner.vue";
 
 <template>
   <TheNavbar />
-  <main class="app-main">
+  <main class="app__main">
     <RouterView />
   </main>
   <TheFooter />

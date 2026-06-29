@@ -1,12 +1,14 @@
 /* ============================================
    GAME EXPLORER — Estilos globales
-     Reset, estilos base y contenedor principal
+   Reset, estilos base y contenedor principal
    ============================================ */
 
-@import './variables.css';
+@import "./variables.css";
 
 /* Reset básico */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -20,7 +22,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.app-main {
+/* BEM Block: app — estructura raíz de la aplicación */
+.app__main {
   min-height: calc(100vh - 140px);
   padding-block: 3rem;
 }
@@ -39,7 +42,6 @@ ul {
   list-style: none;
 }
 
-/* Contenedor centrado que usaremos en todas las vistas */
 .contenedor {
   width: 100%;
   max-width: 1200px;

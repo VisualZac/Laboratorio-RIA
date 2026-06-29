@@ -5,93 +5,103 @@ import { gameService } from "@/services/api.js";
 import { useSearch } from "@/composables/useSearch.js";
 import SkeletonCard from "@/components/ui/skeletonCard.vue";
 import { useInfiniteScroll } from "@/composables/useInfiniteScroll.js";
+import ErrorState from "@/components/ui/ErrorState.vue";
 
 const listaJuegos = ref([]);
 const generos = ref([]);
 const loading = ref(true);
-const paginadoActual = ref(1);
+const error = ref(false);
+const paginadoActual = ref(0);
 
-const { busqueda, filtros, listaCompleta, alEscribir, limpiar, setGenero } = useSearch(listaJuegos);
-const { cargando, hayMas, reiniciar } = useInfiniteScroll(cargarMasJuegos);
+const { busqueda, genero, alEscribir, limpiarBusqueda, setGenero } = useSearch();
+const { cargando, hayMas, reiniciar } = useInfiniteScroll(cargarMasPagina);
 
-let timerBusqueda = null;
+const ordenamiento = ref("-rating");
 
-watch(busqueda, (nuevaBusqueda) => {
-  clearTimeout(timerBusqueda);
-  timerBusqueda = setTimeout(async () => {
-    listaJuegos.value = [];
-    paginadoActual.value = 0;
-    reiniciar();
-
-    if (nuevaBusqueda.trim()) {
-      // Hay texto → buscar en la API (infinite scroll desactivado en búsqueda)
-      const resultado = await gameService.buscarJuegos(nuevaBusqueda.trim(), 1);
-      listaJuegos.value = resultado.juegos;
-      // La búsqueda tiene su propio paginado — dejamos hayMas en manos del resultado
-      hayMas.value = resultado.hayMas;
-    } else {
-      // No hay texto → volver a populares desde página 1
-      await cargarMasJuegos();
-    }
-  }, 400);
-});
-
-// El filtro de género filtra localmente, no hace falta recargar la API.
-// Solo reseteamos el paginado para que el infinite scroll vuelva a activarse.
-watch(filtros, () => {
-  paginadoActual.value = 1;
-  reiniciar();
-});
-
-const ordenamiento = ref("-rating"); // En default por los más populares
-
-// Opciones disponibles
 const opcionesOrden = [
   { valor: "-rating", etiqueta: "Más populares" },
   { valor: "-released", etiqueta: "Más recientes" },
-  { valor: "-metacritic", etiqueta: "Mejor puntuados" },
   { valor: "name", etiqueta: "Nombre A-Z" },
+  { valor: "-name", etiqueta: "Nombre Z-A" },
 ];
 
-// Función que carga la siguiente página y la agrega a la lista
-async function cargarMasJuegos() {
+// ── Carga unificada ─────────────────────────────────────────────────────────
+// Una sola función llama a la API con los tres parámetros combinados.
+// Se usa tanto para el infinite scroll como para la carga inicial y los resets.
+
+async function cargarMasPagina() {
+  if (loading.value && paginadoActual.value > 0) {
+    loading.value = false;
+  }
+
   paginadoActual.value++;
-  const resultado = await gameService.getPopularGames(paginadoActual.value, ordenamiento.value);
+
+  const resultado = await gameService.buscarConFiltros({
+    termino: busqueda.value,
+    genero: genero.value,
+    ordering: ordenamiento.value,
+    page: paginadoActual.value,
+  });
+
   listaJuegos.value.push(...resultado.juegos);
-  // Devolvemos si hay más para que useInfiniteScroll sepa si seguir
+
   return resultado.hayMas;
 }
 
-// Cuando cambia el orden, limpiamos búsqueda y reseteamos todo
-function cambiarOrden(nuevoOrden) {
-  // Si hay búsqueda activa, la limpiamos primero para no mezclar resultados
-  if (busqueda.value) {
-    busqueda.value = "";
-    sessionStorage.removeItem("busqueda_actual");
-  }
-  ordenamiento.value = nuevoOrden;
+async function resetearYCargar() {
+  loading.value = true;
+  error.value = false;
+
   listaJuegos.value = [];
-  paginadoActual.value = 0; // cargarMasJuegos hace ++ antes del fetch, arranca en 1
+  paginadoActual.value = 0;
+
   reiniciar();
-  cargarMasJuegos();
+
+  try {
+    await cargarMasPagina();
+  } catch (e) {
+    console.error(e);
+    error.value = true;
+  } finally {
+    loading.value = false;
+  }
 }
 
+// ── Watchers ─────────────────────────────────────────────────────────────────
+// Cada vez que cambia la búsqueda, el género o el orden, recargamos desde cero.
+// Usamos un debounce solo en la búsqueda de texto para no disparar en cada tecla.
+
+let timerBusqueda = null;
+
+watch(busqueda, () => {
+  clearTimeout(timerBusqueda);
+  timerBusqueda = setTimeout(async () => {
+    await resetearYCargar();
+  }, 400);
+});
+
+watch(genero, async () => {
+  await resetearYCargar();
+});
+
+async function cambiarOrden(nuevoOrden) {
+  ordenamiento.value = nuevoOrden;
+  await resetearYCargar();
+}
+
+// ── Montaje ───────────────────────────────────────────────────────────────────
 onMounted(async () => {
-  const [resultado, listaGeneros] = await Promise.all([
-    gameService.getPopularGames(1, ordenamiento.value),
-    gameService.getGenres(),
-  ]);
-  listaJuegos.value = resultado.juegos;
-  paginadoActual.value = 1;
+  const [, listaGeneros] = await Promise.all([resetearYCargar(), gameService.getGenres()]);
   generos.value = listaGeneros;
   loading.value = false;
 });
 </script>
+
 <template>
   <div class="contenedor inicio">
-    <h1 class="inicio__titulo">Juegos populares</h1>
+    <h1 class="inicio__titulo">Game Explorer</h1>
 
-    <!-- Control de Busqueda y Filtrado -->
+    <!-- Controles de búsqueda y filtrado -->
     <div class="inicio__controles">
       <!-- Selector de ordenamiento -->
       <select
@@ -103,7 +113,8 @@ onMounted(async () => {
           {{ op.etiqueta }}
         </option>
       </select>
-      <!-- Buscador -->
+
+      <!-- Buscador por texto -->
       <div class="buscador">
         <input
           class="buscador__input"
@@ -112,54 +123,56 @@ onMounted(async () => {
           :value="busqueda"
           @input="alEscribir"
         />
-        <button v-if="busqueda" class="buscador__limpiar" @click="limpiar">✕</button>
+        <button v-if="busqueda" class="buscador__limpiar" @click="limpiarBusqueda">✕</button>
       </div>
 
-      <!-- Seleccionar Genero con select y no v-model-->
-      <!--v-model solo actualizaria el ref y no guardar en el sessionStorage porque no puede hacer las dos al mismo tiempo-->
-      <!--Con el @change tenes la posibilidad de hacer ese control de de las dos cosas actualizar y guardar-->
-      <select class="filtro-genero" :value="filtros" @change="setGenero($event.target.value)">
-        <option value="">Todos los Generos</option>
-        <option v-for="genero in generos" :key="genero.id" :value="genero.slug">
-          {{ genero.name }}
+      <!-- Selector de género -->
+      <select class="filtro-genero" :value="genero" @change="setGenero($event.target.value)">
+        <option value="">Todos los géneros</option>
+        <option v-for="g in generos" :key="g.id" :value="g.slug">
+          {{ g.name }}
         </option>
       </select>
 
-      <!--Boton de limpiar los filtros(solo aparecera si tiene un filtro seleccionado :D)-->
-
-      <button v-if="filtros" class="filtro-limpiar" @click="setGenero('')">
-        ✕ Limpiar filtros
-      </button>
+      <!-- Botón limpiar filtro de género -->
+      <button v-if="genero" class="filtro-limpiar" @click="setGenero('')">✕ Limpiar género</button>
     </div>
 
-    <!--Contador de Resultados-->
-    <p v-if="busqueda || filtros" class="inicio__resultados">
-      {{ listaCompleta.length }} resultado{{ listaCompleta.length !== 1 ? "s" : "" }}
+    <!-- Contador de resultados (cuando hay algún filtro activo) -->
+    <p v-if="busqueda || genero" class="inicio__resultados">
+      {{ listaJuegos.length }} resultado{{ listaJuegos.length !== 1 ? "s" : "" }}
     </p>
 
-    <!-- Skeleton loaders mientras carga -->
-    <div v-if="loading" class="inicio__grilla">
+    <!-- Skeleton loaders mientras carga por primera vez -->
+    <div v-if="loading && listaJuegos.length === 0" class="inicio__grilla">
       <SkeletonCard v-for="n in 8" :key="n" />
     </div>
 
+    <ErrorState
+      v-else-if="error"
+      titulo="No pudimos cargar los juegos"
+      mensaje="Revisa tu conexión e inténtalo nuevamente."
+      @retry="resetearYCargar"
+    />
+
     <!-- Sin resultados -->
-    <div v-else-if="listaCompleta.length === 0" class="inicio__sin-resultados">
-      No encontramos juegos con ese nombre.
+    <div v-else-if="listaJuegos.length === 0 && !cargando" class="inicio__sin-resultados">
+      No encontramos juegos con esos filtros.
     </div>
 
-    <!-- Grilla -->
+    <!-- Grilla de juegos -->
     <div v-else class="inicio__grilla">
-      <GameCard v-for="juego in listaCompleta" :key="juego.id" :game="juego" />
+      <GameCard v-for="juego in listaJuegos" :key="juego.id" :game="juego" />
     </div>
 
-    <!-- Indicador de carga al final de la página -->
+    <!-- Spinner de infinite scroll -->
     <div v-if="cargando" class="inicio__cargando-mas">
       <div class="inicio__spinner"></div>
       <p>Cargando más juegos...</p>
     </div>
 
-    <!-- Mensaje cuando ya no hay más -->
-    <div v-else-if="!hayMas && listaCompleta.length > 0" class="inicio__fin">
+    <!-- Fin de resultados -->
+    <div v-else-if="!hayMas && listaJuegos.length > 0" class="inicio__fin">
       Ya viste todos los juegos disponibles
     </div>
   </div>
@@ -181,14 +194,14 @@ onMounted(async () => {
   display: flex;
   gap: 0.75rem;
   align-items: center;
-  flex-wrap: wrap; /* en mobile se apilan */
+  flex-wrap: wrap;
   margin-bottom: 1rem;
 }
 
 /* BEM Block: buscador */
 .buscador {
   position: relative;
-  flex: 1; /* ocupa el espacio disponible */
+  flex: 1;
   min-width: 200px;
 }
 
@@ -269,7 +282,6 @@ onMounted(async () => {
   margin-bottom: 1.5rem;
 }
 
-.inicio__loading,
 .inicio__sin-resultados {
   text-align: center;
   padding: 4rem 0;
@@ -281,6 +293,7 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
 }
+
 /* ── Infinite scroll ── */
 .inicio__cargando-mas {
   display: flex;
